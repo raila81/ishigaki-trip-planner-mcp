@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ishigaki-ferries": {
+      "type": "streamable-http",
+      "url": "https://ishigaki.info/mcp?src=mcp"
+    }
+  }
+}

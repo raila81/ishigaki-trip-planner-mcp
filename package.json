@@ -1,0 +1,8 @@
+{
+  "name": "ishigaki-ferries-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Yaeyama ferry status, timetables and island-day plans from Ishigaki: Taketomi, Iriomote and more.",
+  "homepage": "https://ishigaki.info/developers/",
+  "license": "UNLICENSED"
+}

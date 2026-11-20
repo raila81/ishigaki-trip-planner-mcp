@@ -1,0 +1,321 @@
+{
+  "cloudEndpoint": "https://ishigaki.info/mcp?src=mcp",
+  "description": "Yaeyama ferry status, timetables and island-day plans from Ishigaki: Taketomi, Iriomote and more.",
+  "homepage": "https://ishigaki.info",
+  "identifier": "ishigaki-ferries",
+  "name": "Ishigaki Ferries & Islands",
+  "prompts": [],
+  "resources": [],
+  "tools": [
+    {
+      "name": "ferry_status",
+      "title": "Today's Yaeyama ferry status",
+      "description": "Whether the ferries from Ishigaki to Taketomi, Kohama, Kuroshima, Iriomote (Ohara, Uehara), Hatoma and Hateruma are running today, per operator (Anei Kanko, YKF), read from the operators' own status pages. Values: ok, partial (some sailings cancelled), cancelled, or null when the operator has not posted yet (they post in the morning, Japan time). Example: \"Are the ferries to Taketomi running today?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Today's Yaeyama ferry status",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "next_ferries",
+      "title": "Next ferries on a route",
+      "description": "The next scheduled boats on one route from the operators' published timetables, in Japan time, with fares. direction 'out' is Ishigaki to the island, 'back' is the island to Ishigaki. Example: \"When is the last boat back from Iriomote (Ohara) to Ishigaki?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string",
+            "enum": [
+              "taketomi",
+              "kohama",
+              "kuroshima",
+              "iriomote-ohara",
+              "iriomote-uehara",
+              "hatoma",
+              "hateruma"
+            ],
+            "description": "Route id"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "out",
+              "back"
+            ],
+            "default": "out"
+          },
+          "after": {
+            "type": "string",
+            "description": "HH:MM Japan time; default now",
+            "pattern": "^\\d{1,2}:\\d{2}$"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "default": 3
+          }
+        },
+        "required": [
+          "route"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Next ferries on a route",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "plan_island_day",
+      "title": "Plan an island-hopping day",
+      "description": "Earliest published boats for up to three islands in one day from Ishigaki: out, back, time on each island, when you are back in Ishigaki, or why it cannot be done. Uses the longest printed crossing, 30 minutes between boats, no backup sailings. Boats between islands are not used (you return to Ishigaki in between). Example: \"Can I do Taketomi and Kohama in one day from Ishigaki?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "islands": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "taketomi",
+                "kohama",
+                "kuroshima",
+                "iriomote-ohara",
+                "iriomote-uehara",
+                "hatoma",
+                "hateruma"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 3,
+            "description": "Route ids in the order you want to visit"
+          },
+          "stay_minutes": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 600,
+            "default": 120,
+            "description": "Time wanted on each island"
+          },
+          "start": {
+            "type": "string",
+            "description": "Earliest departure from Ishigaki, HH:MM; default 07:00",
+            "pattern": "^\\d{1,2}:\\d{2}$"
+          }
+        },
+        "required": [
+          "islands"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Plan an island-hopping day",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ferry_cancellation_history",
+      "title": "Ferry cancellation record",
+      "description": "Day-by-day record of cancellations per route since 7 November 2026, from readings of the operators' status pages several times a day (worst reading of the day per operator), with a per-route summary: days recorded, days with any cancellation, days fully cancelled. Example: \"How often has the Hateruma ferry been cancelled lately?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string",
+            "enum": [
+              "taketomi",
+              "kohama",
+              "kuroshima",
+              "iriomote-ohara",
+              "iriomote-uehara",
+              "hatoma",
+              "hateruma",
+              "all"
+            ],
+            "default": "all"
+          },
+          "months": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 13,
+            "default": 2,
+            "description": "Calendar months back, including the current one"
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Ferry cancellation record",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_routes",
+      "title": "Routes from Ishigaki",
+      "description": "The seven ferry routes from Ishigaki Port with operators, crossing time, boats a day, first and last boat, and the page that explains each. Example: \"Which islands can I reach by ferry from Ishigaki?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Routes from Ishigaki",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "which_island",
+      "title": "Which Yaeyama island to visit",
+      "description": "Ranks the six islands reachable by ferry from Ishigaki (Taketomi, Iriomote, Kohama, Kuroshima, Hatoma, Hateruma) for the traveller's time, interests, month, children and sea conditions, with the reasons, the catches, crossing time, boats a day and the cheapest adult fare. Example: \"I have one day on Ishigaki with two small kids and want a beach. Which island should we visit?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "time_available": {
+            "type": "string",
+            "enum": [
+              "half_day",
+              "full_day",
+              "overnight",
+              "several_days"
+            ],
+            "description": "How long the traveller has for the island"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "beach",
+                "snorkeling",
+                "cycling",
+                "village_culture",
+                "jungle_rivers_waterfalls",
+                "wildlife",
+                "sea_turtles",
+                "quiet",
+                "stargazing",
+                "views",
+                "walking"
+              ]
+            },
+            "maxItems": 5,
+            "description": "What the traveller wants to do"
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month of the trip (1 to 12); September to April brings north winds that cancel open-sea routes"
+          },
+          "with_small_children": {
+            "type": "boolean",
+            "default": false
+          },
+          "rough_sea_or_windy": {
+            "type": "boolean",
+            "default": false,
+            "description": "True if the forecast is windy or the sea is rough"
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Which Yaeyama island to visit",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "island_guide",
+      "title": "Island day guide",
+      "description": "A recommended day on one island from Ishigaki, step by step (when, what, source), plus getting around, food, children, rainy days, staying overnight, local rules, crossing time, boats a day and the cheapest adult fare. Example: \"What should I do on a day trip to Kuroshima?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "island": {
+            "type": "string",
+            "enum": [
+              "taketomi",
+              "iriomote",
+              "kohama",
+              "kuroshima",
+              "hatoma",
+              "hateruma"
+            ],
+            "description": "Island id"
+          }
+        },
+        "required": [
+          "island"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Island day guide",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "best_time",
+      "title": "Best time to visit Ishigaki",
+      "description": "Ishigaki and Yaeyama month by month: JMA temperature, rain and sunshine normals, typhoon approaches, 2025 visitor numbers, and what applies that month (rainy season, typhoons, habu jellyfish, north winds that cancel ferries, Japanese holiday peaks, festivals). Give a month, an interest, or neither for the whole year. Example: \"Is October a good time to see manta rays on Ishigaki?\"",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month (1 to 12)"
+          },
+          "interest": {
+            "type": "string",
+            "enum": [
+              "beach_snorkeling",
+              "diving_mantas",
+              "lower_prices",
+              "quiet",
+              "calm_ferries",
+              "culture_festivals"
+            ],
+            "description": "What the trip is for"
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Best time to visit Ishigaki",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  ]
+}
